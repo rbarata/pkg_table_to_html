@@ -24,11 +24,21 @@ CREATE OR REPLACE PACKAGE PKG_TABLE_TO_HTML AS
  * SOFTWARE.
  */
 
+/*****************************************************************************
+  REVISIONS:
+  Ver        Date        Author           Description
+  ---------  ----------  ---------------  ------------------------------------
+  x.1        31/05/2018  RBarata          Added function REFCURSOR_TO_HTML
+******************************************************************************/
+
   FUNCTION TABLE_TO_HTML(v_TableName  VARCHAR2,
                          clob_Message CLOB DEFAULT '') RETURN CLOB;
                          
   FUNCTION SQL_TO_HTML(v_SqlStatement VARCHAR2,
                        clob_Message   CLOB DEFAULT '') RETURN CLOB;
+
+  FUNCTION REFCURSOR_TO_HTML(v_RefCursor IN OUT SYS_REFCURSOR,
+                             clob_Message   CLOB DEFAULT '') RETURN CLOB;
 
   FUNCTION ROW_TO_PIE_CHART_HTML(v_SqlStatement VARCHAR2,
                                  clob_Message   CLOB DEFAULT '') RETURN CLOB;

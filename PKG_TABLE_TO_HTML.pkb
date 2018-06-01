@@ -40,10 +40,17 @@ CREATE OR REPLACE PACKAGE BODY PKG_TABLE_TO_HTML AS
 *   dbms_output.put_line(PKG_TABLE_TO_HTML.SQL_TO_HTML('SELECT EMPLOYEE_ID, FIRST_NAME || ' ' || LAST_NAME AS FULL_NAME FROM HR.EMPLOYEES','My header'));
 *  END;
 *------------------------------------------------
+*  DECLARE
+*   v_query SYS_REFCURSOR;
+*
+*  BEGIN
+*   OPEN v_query FOR 
+*        SELECT EMPLOYEE_ID, FIRST_NAME || ' ' || LAST_NAME AS FULL_NAME FROM HR.EMPLOYEES;
+*
+*   dbms_output.put_line(PKG_TABLE_TO_HTML.REFCURSOR_TO_HTML(v_query,'My header'));
+*  END;
+*------------------------------------------------
 */
-
-  -- week cursor for fetching row
-  TYPE refCur IS REF CURSOR;
 
   -- get the cursor id and concatenate fetched row with separator or html table data tags
   FUNCTION CONCATENATE_ROW(i_CurNum    INTEGER,
@@ -257,7 +264,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_TABLE_TO_HTML AS
   FUNCTION SQL_TO_HTML(v_SqlStatement VARCHAR2,
                        clob_Message   CLOB DEFAULT '') RETURN CLOB IS
     i_CurNum       INTEGER;
-    curObj         refCur;
+    curObj         SYS_REFCURSOR;
     clob_Data      CLOB := null;
   BEGIN
     OPEN curObj FOR v_SqlStatement;
@@ -269,10 +276,25 @@ CREATE OR REPLACE PACKAGE BODY PKG_TABLE_TO_HTML AS
     RETURN clob_Data;
   END;
 
+
+  FUNCTION REFCURSOR_TO_HTML(v_RefCursor IN OUT SYS_REFCURSOR,
+                             clob_Message   CLOB DEFAULT '') RETURN CLOB IS
+    i_CurNum       INTEGER;
+    clob_Data      CLOB := null;
+  BEGIN
+    i_CurNum := DBMS_SQL.to_cursor_number(v_RefCursor);
+    DEFINE_COLUMNS(i_CurNum);
+    clob_Data := CREATE_HTML(clob_Message, i_CurNum, '<html><body>', '</body></html>');
+
+    RETURN clob_Data;
+  END;
+
+
+
   FUNCTION ROW_TO_PIE_CHART_HTML(v_SqlStatement VARCHAR2,
                                  clob_Message   CLOB DEFAULT '') RETURN CLOB IS
     i_CurNum       INTEGER;
-    curObj         refCur;
+    curObj         SYS_REFCURSOR;
     clob_Data      CLOB := null;
     clob_JsData    CLOB := null;
   BEGIN
